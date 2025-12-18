@@ -1,0 +1,10 @@
+node_modules/
+
+# environment
+.env
+
+# firebase / cloud keys
+serviceAccountKey.json
+
+# logs
+*.log

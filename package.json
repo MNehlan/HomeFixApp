@@ -1,0 +1,13 @@
+{
+  "name": "home-fix-app",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "backend": "cd backend && npm run dev --silent",
+    "frontend": "cd frontend && npm run dev --silent",
+    "dev": "concurrently -k -n \"BACKEND,FRONTEND\" -c \"green,blue\" \"npm run backend\" \"npm run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
