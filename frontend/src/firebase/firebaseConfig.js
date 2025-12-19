@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE.API.KEY,
-  authDomain: import.meta.env.VITE.AUTHDOMAIN,
-  projectId: import.meta.env.VITE.PROJECTID,
-  storageBucket: import.meta.env.VITE.STORAGEBUCKET,
-  messagingSenderId: import.meta.env.VITE.MESSAGINGSENDERID,
-  appId: import.meta.env.VITE.APPID
+  apiKey: import.meta.env.VITE.FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE.FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE.FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE.FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE.FIREBASE_APP_ID
 };
 
 
