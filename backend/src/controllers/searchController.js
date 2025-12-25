@@ -28,6 +28,13 @@ export const searchTechnicians = async (req, res) => {
       if (category && techData.category !== category) continue
       if (minRating && techData.averageRating < Number(minRating)) continue
 
+      // City filter (case-insensitive substring match)
+      if (req.query.city && techData.city) {
+        if (!techData.city.includes(req.query.city.toLowerCase())) continue
+      } else if (req.query.city && !techData.city) {
+        continue // If searching for city but tech has none
+      }
+
       results.push({
         technicianId: userDoc.id,
         name: userDoc.data().name,

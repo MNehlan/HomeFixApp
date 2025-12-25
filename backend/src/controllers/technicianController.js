@@ -1,7 +1,7 @@
 import { db } from "../config/firebase.js"
 
 export const applyTechnician = async (req, res) => {
-  const { category, price, experience, bio = "" } = req.body
+  const { category, price, experience, bio = "", city = "", photoUrl } = req.body
 
   await db
     .collection("technicians")
@@ -12,6 +12,7 @@ export const applyTechnician = async (req, res) => {
         price: Number(price) || 0,
         experience: experience || "",
         bio,
+        city: city.toLowerCase(), // Save normalized for easier search
         averageRating: 0,
         totalReviews: 0,
         updatedAt: new Date(),
@@ -21,11 +22,17 @@ export const applyTechnician = async (req, res) => {
 
   const roles = Array.from(new Set([...(req.user.roles || []), "technician"]))
 
-  await db.collection("users").doc(req.user.uid).update({
+  const userUpdates = {
     role: "technician",
     technicianStatus: "PENDING",
     roles,
-  })
+  }
+
+  if (photoUrl) {
+    userUpdates.profilePic = photoUrl
+  }
+
+  await db.collection("users").doc(req.user.uid).update(userUpdates)
 
   res.json({ message: "Technician application submitted", status: "PENDING" })
 }

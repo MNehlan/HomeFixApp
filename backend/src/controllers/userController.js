@@ -59,7 +59,11 @@ export const updateProfile = async (req, res) => {
 
     res.json({ message: "Profile updated" })
   } catch (error) {
-    console.error("Profile update error", error)
     res.status(500).json({ message: "Failed to update profile" })
   }
+}
+
+export const uploadFile = (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" })
+  res.json({ url: req.file.path })
 }

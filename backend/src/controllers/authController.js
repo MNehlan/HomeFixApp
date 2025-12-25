@@ -12,7 +12,7 @@ const registerWithRole = async (req, res, accountType = "customer") => {
     if (!token) return res.status(401).json({ message: "No token provided" })
 
     const decoded = await auth.verifyIdToken(token)
-    const { name, category, experience, price, bio = "" } = req.body
+    const { name, category, experience, price, bio = "", photoUrl } = req.body
 
     // Prevent duplicate profile creation
     const userRef = db.collection("users").doc(decoded.uid)
@@ -36,7 +36,7 @@ const registerWithRole = async (req, res, accountType = "customer") => {
       name,
       email: decoded.email,
       createdAt: new Date(),
-      profilePic: "",
+      profilePic: photoUrl || "",
       technicianStatus: "NONE",
       role: "customer",
       roles: ["customer"],
