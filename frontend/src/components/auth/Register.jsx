@@ -49,10 +49,10 @@ const Register = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-sm bg-white p-6 rounded-2xl shadow space-y-4"
+      className="w-full space-y-5"
     >
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-slate-900">Create customer account</h1>
+      <div className="space-y-1.5">
+        <h2 className="text-2xl font-bold text-slate-900">Create Account</h2>
         <p className="text-sm text-slate-500">
           Sign up to book verified home service technicians.
         </p>
@@ -64,44 +64,46 @@ const Register = () => {
         </p>
       )}
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Full name</label>
-        <input
-          placeholder="Your name"
-          className="w-full border px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-black/80"
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-        />
-      </div>
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+          <input
+            placeholder="Your name"
+            className="w-full bg-slate-50 border-slate-200 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition-all font-medium text-slate-900 placeholder:text-slate-400"
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value })
+            }
+          />
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Email</label>
-        <input
-          type="email"
-          placeholder="you@example.com"
-          className="w-full border px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-black/80"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
-      </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            className="w-full bg-slate-50 border-slate-200 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition-all font-medium text-slate-900 placeholder:text-slate-400"
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
+          />
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Password</label>
-        <input
-          type="password"
-          placeholder="At least 6 characters"
-          className="w-full border px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-black/80"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+          <input
+            type="password"
+            placeholder="At least 6 characters"
+            className="w-full bg-slate-50 border-slate-200 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 transition-all font-medium text-slate-900 placeholder:text-slate-400"
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       <button
         disabled={loading}
-        className="w-full bg-black text-white py-2.5 rounded-lg text-sm font-semibold disabled:opacity-60 hover:opacity-90"
+        className="w-full bg-black text-white py-3.5 rounded-xl text-sm font-bold tracking-wide hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-black/20"
       >
         {loading ? "Creating account..." : "Sign Up"}
       </button>

@@ -10,6 +10,7 @@ import TechnicianPending from "./pages/technician/TechnicianPending";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import PartnerSignup from "./pages/PartnerSignup";
+import TechnicianPublicProfile from "./pages/TechnicianPublicProfile";
 
 function App() {
   return (
@@ -38,6 +39,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["customer"]}>
               <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/technician/profile/:technicianId"
+          element={
+            <ProtectedRoute allowedRoles={["customer", "admin"]}>
+              <TechnicianPublicProfile />
             </ProtectedRoute>
           }
         />

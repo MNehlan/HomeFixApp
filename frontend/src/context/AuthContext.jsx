@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { auth } from "../firebase/firebaseConfig";
 import {
   signInWithEmailAndPassword,
@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import api from "../services/api";
 
-const AuthContext = createContext(null);
+import { AuthContext } from "./auth-context";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -15,8 +15,15 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
 
   const fetchProfile = async () => {
-    const res = await api.get("/user/profile");
-    return res.data;
+    try {
+      const res = await api.get("/user/profile");
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null; // Profile not created yet
+      }
+      throw err;
+    }
   };
 
   const login = async (email, password) => {
@@ -27,10 +34,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
 
       const profile = await fetchProfile();
+      if (!profile) {
+        throw new Error("Profile not found. Please contact support or register again.")
+      }
       setUser(profile);
       return profile;
     } catch (err) {
-      setAuthError("Invalid email or password");
+      setAuthError(err.message || "Invalid email or password");
       throw err;
     }
   };
@@ -47,7 +57,14 @@ export const AuthProvider = ({ children }) => {
         if (firebaseUser) {
           const token = await firebaseUser.getIdToken();
           localStorage.setItem("token", token);
-          const profile = await fetchProfile();
+
+          let profile = await fetchProfile();
+          // Retry once if profile not found (handle signup race condition)
+          if (!profile) {
+            await new Promise(r => setTimeout(r, 1000));
+            profile = await fetchProfile();
+          }
+
           setUser(profile);
         } else {
           setUser(null);
@@ -71,6 +88,14 @@ export const AuthProvider = ({ children }) => {
         authError,
         login,
         logout,
+        refreshUser: async () => {
+          let profile = await fetchProfile()
+          if (!profile) {
+            await new Promise(r => setTimeout(r, 1000));
+            profile = await fetchProfile();
+          }
+          setUser(profile)
+        },
         isAuthenticated: !!user,
       }}
     >
@@ -79,4 +104,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+

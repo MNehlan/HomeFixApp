@@ -2,6 +2,15 @@ const TechnicianFilters = ({ filters, setFilters, onSearch }) => {
   return (
     <div className="border p-4 rounded mb-4 space-y-2">
       <input
+        placeholder="City / Location"
+        className="border p-2 w-full"
+        value={filters.city || ""}
+        onChange={(e) =>
+          setFilters({ ...filters, city: e.target.value })
+        }
+      />
+
+      <input
         placeholder="Category"
         className="border p-2 w-full"
         value={filters.category}

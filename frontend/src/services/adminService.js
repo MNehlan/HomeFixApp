@@ -16,3 +16,8 @@ export const getAllUsers = async () => {
   const res = await api.get("/admin/users")
   return res.data
 }
+
+export const getDashboardStats = async () => {
+  const res = await api.get("/admin/stats")
+  return res.data
+}

@@ -1,88 +1,56 @@
-import { useState } from "react"
-import { rateTechnician } from "../../services/technicianService"
+import { useNavigate } from "react-router-dom"
+import StarRating from "../common/StarRating"
 
 const TechnicianCard = ({ technician }) => {
-  const [rating, setRating] = useState("")
-  const [review, setReview] = useState("")
-  const [submitted, setSubmitted] = useState(false)
-  const [showDetails, setShowDetails] = useState(false)
-
-  const submitRating = async () => {
-    await rateTechnician(technician.technicianId, rating, review)
-    setSubmitted(true)
-  }
+  const navigate = useNavigate()
 
   return (
-    <div className="border p-4 rounded space-y-2 bg-white">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-lg font-bold">{technician.name}</h3>
-          <p className="text-sm text-gray-600">{technician.category}</p>
+    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex gap-3">
+          <div className="w-12 h-12 rounded-full bg-slate-100 overflow-hidden shrink-0">
+            {technician.photoUrl ? (
+              <img src={technician.photoUrl} alt={technician.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center font-bold text-slate-400 text-lg">
+                {technician.name?.[0]}
+              </div>
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">{technician.name}</h3>
+            <p className="text-sm text-emerald-600 font-medium">{technician.category}</p>
+          </div>
         </div>
-        <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-sm">
-          ⭐ {technician.averageRating}
-        </span>
+        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
+          <span className="font-bold text-yellow-700 text-sm">{technician.averageRating || "New"}</span>
+          <span className="text-yellow-500 text-xs">★</span>
+        </div>
       </div>
 
-      <p>Experience: {technician.experience}</p>
-      <p className="font-semibold">Price: ₹{technician.price}</p>
+      <div className="space-y-1 mb-4">
+        <div className="flex justify-between text-sm text-slate-600">
+          <span>Experience</span>
+          <span className="font-medium text-slate-900">{technician.experience}</span>
+        </div>
+        <div className="flex justify-between text-sm text-slate-600">
+          <span>Rate</span>
+          <span className="font-medium text-slate-900">₹{technician.price}/hr</span>
+        </div>
+        <div className="flex justify-between text-sm text-slate-600">
+          <span>Reviews</span>
+          <span className="font-medium text-slate-900">{technician.totalReviews || 0}</span>
+        </div>
+      </div>
 
-      <div className="flex gap-2">
-        <a
-          href="tel:+10000000000"
-          className="px-3 py-1 rounded bg-slate-200 text-sm"
-        >
-          Call
-        </a>
-        <a
-          href="sms:+10000000000"
-          className="px-3 py-1 rounded bg-slate-200 text-sm"
-        >
-          Text
-        </a>
+      <div className="flex gap-2 mt-4 pt-4 border-t border-slate-50">
         <button
-          onClick={() => setShowDetails((s) => !s)}
-          className="px-3 py-1 rounded bg-black text-white text-sm"
+          onClick={() => navigate(`/technician/profile/${technician.technicianId || technician.id}`)}
+          className="flex-1 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-black transition-colors"
         >
-          {showDetails ? "Hide Profile" : "View Profile"}
+          View Profile & Book
         </button>
       </div>
-
-      {showDetails && (
-        <div className="border rounded p-3 text-sm space-y-2">
-          <p>Average Rating: {technician.averageRating}</p>
-          <p>Total Reviews: {technician.totalReviews}</p>
-          {technician.bio && <p>{technician.bio}</p>}
-        </div>
-      )}
-
-      {!submitted ? (
-        <div className="space-y-2">
-          <input
-            type="number"
-            min="1"
-            max="5"
-            placeholder="Rate (1-5)"
-            className="border p-1 w-full"
-            onChange={(e) => setRating(e.target.value)}
-          />
-
-          <input
-            placeholder="Review"
-            className="border p-1 w-full"
-            onChange={(e) => setReview(e.target.value)}
-          />
-
-          <button
-            onClick={submitRating}
-            className="bg-green-600 text-white px-3 py-1 rounded"
-          >
-            Submit Rating
-          </button>
-        </div>
-      ) : (
-        <p className="text-green-600">Thanks for rating!</p>
-      )}
     </div>
   )
 }
