@@ -1,4 +1,4 @@
-import { db } from "../config/firebase.js"
+import { db, auth } from "../config/firebase.js"
 
 export const verifyTechnician = async (req, res) => {
   const { userId, status } = req.body
@@ -8,6 +8,30 @@ export const verifyTechnician = async (req, res) => {
   })
 
   res.json({ message: "Technician status updated" })
+}
+
+export const deleteUser = async (req, res) => {
+  const { userId } = req.body
+
+  if (!userId) return res.status(400).json({ message: "User ID required" })
+
+  try {
+    // 1. Delete from Firestore (Users & Technicians)
+    await db.collection("users").doc(userId).delete()
+    await db.collection("technicians").doc(userId).delete()
+
+    // 2. Delete from Firebase Auth
+    try {
+      await auth.deleteUser(userId)
+    } catch (authErr) {
+      console.warn(`Auth user ${userId} not found or already deleted`, authErr.message)
+    }
+
+    res.json({ message: "User deleted successfully" })
+  } catch (error) {
+    console.error("Delete user error", error)
+    res.status(500).json({ message: "Failed to delete user" })
+  }
 }
 
 export const getPendingTechnicians = async (_req, res) => {
@@ -38,10 +62,26 @@ export const getPendingTechnicians = async (_req, res) => {
 export const getAllUsers = async (_req, res) => {
   try {
     const snap = await db.collection("users").get()
-    const users = snap.docs.map((doc) => ({
-      uid: doc.id,
-      ...doc.data(),
+
+    // Use Promise.all to fetch technician details in parallel
+    const users = await Promise.all(snap.docs.map(async (doc) => {
+      const userData = doc.data()
+      let techData = {}
+
+      if (userData.roles?.includes("technician")) {
+        const techSnap = await db.collection("technicians").doc(doc.id).get()
+        if (techSnap.exists) {
+          techData = techSnap.data()
+        }
+      }
+
+      return {
+        uid: doc.id,
+        ...userData,
+        ...techData
+      }
     }))
+
     res.json(users)
   } catch (error) {
     console.error("Users fetch error", error)

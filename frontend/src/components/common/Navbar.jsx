@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { useAuth } from "../../context/auth-context"
+import { useAuth } from "../../context/AuthContextDefinition"
 import { useNavigate } from "react-router-dom"
 import ProfileModal from "./ProfileModal"
 
@@ -43,9 +43,9 @@ const Navbar = () => {
                 className="flex items-center gap-2 focus:outline-none"
               >
                 <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
-                  {user.photoUrl ? (
+                  {user.profilePic ? (
                     <img
-                      src={user.photoUrl}
+                      src={user.profilePic}
                       alt={user.name}
                       className="w-full h-full object-cover"
                     />

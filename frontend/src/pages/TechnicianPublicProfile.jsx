@@ -2,20 +2,37 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "../firebase/firebaseConfig"
-import { getTechnicianReviews, getTechnicianStats } from "../services/reviewService"
+import { getTechnicianReviews } from "../services/technicianService"
 import ReviewList from "../components/reviews/ReviewList"
 import AddReviewModal from "../components/reviews/AddReviewModal"
 import StarRating from "../components/common/StarRating"
+import { useAuth } from "../context/AuthContextDefinition"
+import { initiateChat } from "../services/chatService"
+import { useNavigate } from "react-router-dom"
 
 const TechnicianPublicProfile = () => {
     const { technicianId } = useParams()
 
 
     const [technician, setTechnician] = useState(null)
-    const [reviews, setReviews] = useState([])
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
     const [showReviewModal, setShowReviewModal] = useState(false)
+    const { user } = useAuth()
+    const navigate = useNavigate()
+
+    const handleChat = async () => {
+        if (!user) {
+            navigate("/auth")
+            return
+        }
+        try {
+            const chatId = await initiateChat(user.uid, technician.uid || technician.id, technicianId)
+            navigate(`/chat/${chatId}`)
+        } catch (error) {
+            console.error("Chat initiation failed", error)
+        }
+    }
 
     const loadData = async () => {
         try {
@@ -34,11 +51,8 @@ const TechnicianPublicProfile = () => {
             setTechnician({ id: techDoc.id, ...techDoc.data() })
 
             // Fetch Reviews & Stats
-            const reviewsData = await getTechnicianReviews(technicianId)
-            const statsData = await getTechnicianStats(technicianId)
-
-            setReviews(reviewsData)
-            setStats(statsData)
+            const data = await getTechnicianReviews(technicianId)
+            setStats(data.stats)
         } catch (err) {
             console.error("Failed to load technician profile", err)
         } finally {
@@ -62,8 +76,8 @@ const TechnicianPublicProfile = () => {
             {/* Header Profile Card */}
             <div className="bg-white rounded-2xl shadow-sm border p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start mb-8">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-100 overflow-hidden shrink-0 border-4 border-white shadow-lg">
-                    {technician.photoUrl ? (
-                        <img src={technician.photoUrl} alt={technician.name} className="w-full h-full object-cover" />
+                    {technician.profilePic ? (
+                        <img src={technician.profilePic} alt={technician.name} className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-slate-400">
                             {technician.name?.[0]}
@@ -88,9 +102,24 @@ const TechnicianPublicProfile = () => {
                     </p>
 
                     <div className="flex gap-3 justify-center md:justify-start">
-                        <button className="bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90">
-                            Book Now
-                        </button>
+                        {technician.isAvailable !== false ? (
+                            <button onClick={handleChat} className="bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90">
+                                Chat & Book
+                            </button>
+                        ) : (
+                            <button disabled className="bg-slate-200 text-slate-500 px-6 py-2.5 rounded-xl font-semibold cursor-not-allowed">
+                                Currently Unavailable
+                            </button>
+                        )}
+
+                        {technician.mobile && (
+                            <a
+                                href={`tel:${technician.mobile}`}
+                                className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 flex items-center gap-2"
+                            >
+                                <span>📞</span> Call Now
+                            </a>
+                        )}
                         <button
                             onClick={() => setShowReviewModal(true)}
                             className="border border-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-slate-50"
@@ -107,7 +136,7 @@ const TechnicianPublicProfile = () => {
                     <h2 className="text-xl font-bold text-slate-900">Reviews & Ratings</h2>
                 </div>
 
-                {stats && <ReviewList reviews={reviews} stats={stats} />}
+                {stats && <ReviewList technicianId={technician.id} />}
             </div>
 
             <AddReviewModal

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams, Link } from "react-router-dom"
 import Login from "../components/auth/Login"
 import Register from "../components/auth/Register"
 
@@ -14,9 +14,9 @@ const AuthPage = () => {
       <div className="max-w-4xl w-full grid md:grid-cols-2 gap-12 items-center">
         {/* Left Side - Modern Abstract/Branding */}
         <div className="hidden md:flex flex-col justify-center space-y-6">
-          <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center">
+          <Link to="/" className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center transition hover:scale-105">
             <span className="text-white font-bold text-2xl">H</span>
-          </div>
+          </Link>
           <div>
             <h1 className="text-4xl font-extrabold text-slate-900 leading-tight mb-4">
               Expert Home Services, <br />
@@ -39,8 +39,8 @@ const AuthPage = () => {
           <div className="mb-6 flex p-1 bg-slate-100 rounded-xl self-start w-full">
             <button
               className={`flex-1 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === "login"
-                  ? "bg-white text-black shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                ? "bg-white text-black shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
                 }`}
               onClick={() => setMode("login")}
             >
@@ -48,8 +48,8 @@ const AuthPage = () => {
             </button>
             <button
               className={`flex-1 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === "register"
-                  ? "bg-white text-black shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                ? "bg-white text-black shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
                 }`}
               onClick={() => setMode("register")}
             >

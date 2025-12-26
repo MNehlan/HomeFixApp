@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useAuth } from "../../context/auth-context"
+import { useAuth } from "../../context/AuthContextDefinition"
 import api from "../../services/api" // Direct usage if service not available
 
 const ProfileModal = ({ isOpen, onClose }) => {

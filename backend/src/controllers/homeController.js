@@ -13,9 +13,11 @@ export const getHomeData = async (req, res) => {
     const topTechs = await Promise.all(
       topTechsSnap.docs.map(async (doc) => {
         const userSnap = await db.collection("users").doc(doc.id).get()
+        const userData = userSnap.exists ? userSnap.data() : {}
         return {
           uid: doc.id,
-          name: userSnap.exists ? userSnap.data().name : "Unknown",
+          name: userData.name || "Unknown",
+          profilePic: userData.profilePic || "",
           ...doc.data(),
         }
       })

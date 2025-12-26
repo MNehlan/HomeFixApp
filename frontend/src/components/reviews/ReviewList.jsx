@@ -1,6 +1,37 @@
+import { useState, useEffect } from "react"
+import { getTechnicianReviews } from "../../services/technicianService"
 import StarRating from "../common/StarRating"
 
-const ReviewList = ({ reviews, stats }) => {
+const ReviewList = ({ technicianId }) => {
+    const [reviews, setReviews] = useState([])
+    const [stats, setStats] = useState({
+        totalReviews: 0,
+        averageRating: 0,
+        ratingCounts: {}
+    })
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            if (!technicianId) return
+            try {
+                setLoading(true)
+                const data = await getTechnicianReviews(technicianId)
+                setReviews(data.reviews)
+                setStats(data.stats)
+            } catch (error) {
+                console.error("Failed to load reviews", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchReviews()
+    }, [technicianId])
+
+    if (loading) {
+        return <div className="text-center py-8">Loading reviews...</div>
+    }
+
     if (!reviews || reviews.length === 0) {
         return (
             <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg">
@@ -74,7 +105,7 @@ const ReviewList = ({ reviews, stats }) => {
                                         </div>
                                     </div>
                                     <p className="mt-2 text-slate-600 text-sm leading-relaxed">
-                                        {review.comment}
+                                        {review.review}
                                     </p>
                                 </div>
                             </div>

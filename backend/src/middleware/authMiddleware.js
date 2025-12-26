@@ -18,14 +18,18 @@ export const verifyToken = async (req, res, next) => {
     const decoded = await auth.verifyIdToken(token)
 
     // 3️⃣ Fetch user profile from Firestore
+    // 3️⃣ Fetch user profile from Firestore (if exists)
     const userRef = db.collection("users").doc(decoded.uid)
     const userSnap = await userRef.get()
 
-    if (!userSnap.exists) {
-      return res.status(404).json({ message: "User profile not found" })
+    let userData = {}
+    if (userSnap.exists) {
+      userData = userSnap.data()
+    } else {
+      // NOTE: Allow request to proceed even if profile is missing
+      // This is required for "Upload" during registration flow
+      console.log(`⚠️ Profile missing for ${decoded.uid}, treating as new user.`)
     }
-
-    const userData = userSnap.data()
 
     // 4️⃣ Force admin role ONLY for predefined admin email
     let role = userData.role || "customer"

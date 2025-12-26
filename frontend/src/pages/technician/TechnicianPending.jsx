@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/auth-context"
+import { useAuth } from "../../context/AuthContextDefinition"
 
 const TechnicianPending = () => {
   const { user } = useAuth()

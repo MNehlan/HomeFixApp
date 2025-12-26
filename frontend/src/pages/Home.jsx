@@ -76,10 +76,21 @@ const Home = () => {
             data.topTechnicians.map((tech) => (
               <div key={tech.uid} className="bg-white shadow-lg rounded-2xl p-6 border">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-500">Top Rated Technician</p>
-                    <p className="font-bold text-lg text-slate-900">{tech.name}, {tech.category}</p>
-                    {tech.city && <p className="text-xs text-slate-400">{tech.city}</p>}
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0 border">
+                      {tech.profilePic ? (
+                        <img src={tech.profilePic} alt={tech.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center font-bold text-slate-500">
+                          {tech.name?.[0]}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">Top Rated Technician</p>
+                      <p className="font-bold text-lg text-slate-900">{tech.name}, {tech.category}</p>
+                      {tech.city && <p className="text-xs text-slate-400 capitalize">{tech.city}</p>}
+                    </div>
                   </div>
                   <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm">
                     {tech.averageRating} ★

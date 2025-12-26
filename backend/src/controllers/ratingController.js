@@ -55,3 +55,60 @@ export const addRating = async (req, res) => {
     res.status(500).json({ message: "Failed to add rating" })
   }
 }
+
+export const getReviews = async (req, res) => {
+  try {
+    const { technicianId } = req.params
+
+    const snapshot = await db
+      .collection("ratings")
+      .where("technicianId", "==", technicianId)
+      // .orderBy("createdAt", "desc") // Removed to avoid index requirement
+      .get()
+
+    const reviews = []
+    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    let totalRatingSum = 0
+
+    // Fetch user details for each review
+    const customerPromises = snapshot.docs.map(async (doc) => {
+      const data = doc.data()
+      ratingCounts[data.rating] = (ratingCounts[data.rating] || 0) + 1
+      totalRatingSum += data.rating
+
+      const userSnap = await db.collection("users").doc(data.customerId).get()
+      const userData = userSnap.data() || {}
+
+      return {
+        id: doc.id,
+        ...data,
+        customerName: userData.name || "Anonymous",
+        customerPhotoUrl: userData.profilePic || null,
+      }
+    })
+
+    let resolvedReviews = await Promise.all(customerPromises)
+
+    // Sort in memory (newest first)
+    resolvedReviews.sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt)
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt)
+      return dateB - dateA
+    })
+
+    const totalReviews = resolvedReviews.length
+    const averageRating = totalReviews > 0 ? (totalRatingSum / totalReviews).toFixed(1) : 0
+
+    res.json({
+      reviews: resolvedReviews,
+      stats: {
+        totalReviews,
+        averageRating,
+        ratingCounts,
+      },
+    })
+  } catch (error) {
+    console.error("Get reviews error", error)
+    res.status(500).json({ message: "Failed to fetch reviews" })
+  }
+}

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { verifyTechnician } from "../../services/adminService"
+import { verifyTechnician, deleteUser } from "../../services/adminService"
 
 const AdminUserDetailModal = ({ isOpen, onClose, user, onUpdate }) => {
     const [loading, setLoading] = useState(false)
@@ -20,6 +20,22 @@ const AdminUserDetailModal = ({ isOpen, onClose, user, onUpdate }) => {
         }
     }
 
+    const handleDelete = async () => {
+        if (!window.confirm("Are you sure you want to permanently delete this user? This action cannot be undone.")) return
+
+        setLoading(true)
+        try {
+            await deleteUser(user.uid)
+            if (onUpdate) onUpdate()
+            onClose()
+        } catch (error) {
+            console.error("Failed to delete user", error)
+            alert("Failed to delete user")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative flex flex-col">
@@ -30,8 +46,8 @@ const AdminUserDetailModal = ({ isOpen, onClose, user, onUpdate }) => {
                 <div className="p-6">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-20 h-20 rounded-full bg-slate-100 overflow-hidden shrink-0 border">
-                            {user.photoUrl ? (
-                                <img src={user.photoUrl} alt={user.name} className="w-full h-full object-cover" />
+                            {user.profilePic ? (
+                                <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-400 text-xl font-bold">
                                     {user.name?.[0]}
@@ -78,7 +94,7 @@ const AdminUserDetailModal = ({ isOpen, onClose, user, onUpdate }) => {
                                     </div>
                                     <div>
                                         <p className="text-slate-500 text-xs uppercase">Price</p>
-                                        <p className="font-medium">{user.price ? `$${user.price}/hr` : "N/A"}</p>
+                                        <p className="font-medium">{user.price ? `₹${user.price}/hr` : "N/A"}</p>
                                     </div>
                                     <div>
                                         <p className="text-slate-500 text-xs uppercase">City</p>
@@ -116,25 +132,34 @@ const AdminUserDetailModal = ({ isOpen, onClose, user, onUpdate }) => {
                         </div>
                     </div>
 
-                    {/* Action Buttons for Pending Technicians (or even approved ones if we want to revoke) */}
-                    {user.role === 'technician' && user.technicianStatus === 'PENDING' && (
-                        <div className="mt-8 flex gap-3 border-t pt-4">
-                            <button
-                                onClick={() => handleVerify("APPROVED")}
-                                disabled={loading}
-                                className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                                {loading ? "Processing..." : "Approve Technician"}
-                            </button>
-                            <button
-                                onClick={() => handleVerify("REJECTED")}
-                                disabled={loading}
-                                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50"
-                            >
-                                Reject
-                            </button>
-                        </div>
-                    )}
+                    {/* Action Buttons */}
+                    <div className="mt-8 flex gap-3 border-t pt-4">
+                        {user.role === 'technician' && user.technicianStatus === 'PENDING' && (
+                            <>
+                                <button
+                                    onClick={() => handleVerify("APPROVED")}
+                                    disabled={loading}
+                                    className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 disabled:opacity-50"
+                                >
+                                    {loading ? "Processing..." : "Approve"}
+                                </button>
+                                <button
+                                    onClick={() => handleVerify("REJECTED")}
+                                    disabled={loading}
+                                    className="flex-1 bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 disabled:opacity-50"
+                                >
+                                    Reject
+                                </button>
+                            </>
+                        )}
+                        <button
+                            onClick={handleDelete}
+                            disabled={loading}
+                            className={`flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 ${user.role === 'admin' ? 'hidden' : ''}`}
+                        >
+                            {loading ? "Processing..." : "Delete User"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

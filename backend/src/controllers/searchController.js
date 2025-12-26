@@ -25,6 +25,7 @@ export const searchTechnicians = async (req, res) => {
       const techData = techDoc.data()
 
       // 3. Apply filters
+      // if (techData.isAvailable === false) continue // Removed to show unavailable techs
       if (category && techData.category !== category) continue
       if (minRating && techData.averageRating < Number(minRating)) continue
 
@@ -39,6 +40,7 @@ export const searchTechnicians = async (req, res) => {
         technicianId: userDoc.id,
         name: userDoc.data().name,
         profilePic: userDoc.data().profilePic || null,
+        isAvailable: techData.isAvailable !== false,
         ...techData
       })
     }

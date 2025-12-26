@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import {
   getPendingTechnicians,
@@ -7,7 +8,7 @@ import {
 } from "../../services/adminService"
 import VerifyTechnicianCard from "../../components/admin/VerifyTechnicianCard"
 import AdminUserDetailModal from "../../components/admin/AdminUserDetailModal"
-import { useAuth } from "../../context/auth-context"
+import { useAuth } from "../../context/AuthContextDefinition"
 import { useNavigate } from "react-router-dom"
 
 const AdminDashboard = () => {
@@ -148,8 +149,8 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 font-medium text-slate-900">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                            {u.photoUrl ? (
-                              <img src={u.photoUrl} alt={u.name} className="w-full h-full object-cover" />
+                            {u.profilePic ? (
+                              <img src={u.profilePic} alt={u.name} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-500">
                                 {u.name?.[0]}
@@ -163,7 +164,7 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 capitalize">
-                        <span className={`px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'technician' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                        <span className={`px - 2 py - 1 rounded text - xs ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'technician' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'} `}>
                           {u.role}
                         </span>
                       </td>

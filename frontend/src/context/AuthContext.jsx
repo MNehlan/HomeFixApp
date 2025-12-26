@@ -7,7 +7,9 @@ import {
 } from "firebase/auth";
 import api from "../services/api";
 
-import { AuthContext } from "./auth-context";
+import { getFriendlyErrorMessage } from "../utils/errorUtils";
+
+import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -40,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       setUser(profile);
       return profile;
     } catch (err) {
-      setAuthError(err.message || "Invalid email or password");
+      setAuthError(getFriendlyErrorMessage(err));
       throw err;
     }
   };

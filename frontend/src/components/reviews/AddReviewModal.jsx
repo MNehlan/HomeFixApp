@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { useAuth } from "../../context/auth-context"
-import { addReview } from "../../services/reviewService"
+
+import { rateTechnician } from "../../services/technicianService"
 import StarRating from "../common/StarRating"
 
 const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
-    const { user } = useAuth()
+
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState("")
     const [loading, setLoading] = useState(false)
@@ -23,21 +23,15 @@ const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
         setError("")
 
         try {
-            await addReview({
-                technicianId,
-                customerId: user.uid,
-                customerName: user.name,
-                customerPhotoUrl: user.photoUrl || null,
-                rating,
-                comment
-            })
+            await rateTechnician(technicianId, rating, comment)
             onReviewAdded()
             onClose()
             setRating(0)
             setComment("")
         } catch (err) {
             console.error(err)
-            setError("Failed to submit review")
+            const msg = err.response?.data?.message || "Failed to submit review"
+            setError(msg)
         } finally {
             setLoading(false)
         }

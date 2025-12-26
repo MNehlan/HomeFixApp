@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 import PartnerSignup from "./pages/PartnerSignup";
 import TechnicianPublicProfile from "./pages/TechnicianPublicProfile";
+import ChatPage from "./pages/ChatPage";
 
 function App() {
   return (
@@ -60,6 +61,24 @@ function App() {
               requireApprovedTechnician
             >
               <TechnicianDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* MESSAGING */}
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute allowedRoles={["customer", "technician"]}>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/:chatId"
+          element={
+            <ProtectedRoute allowedRoles={["customer", "technician"]}>
+              <ChatPage />
             </ProtectedRoute>
           }
         />

@@ -21,3 +21,8 @@ export const getDashboardStats = async () => {
   const res = await api.get("/admin/stats")
   return res.data
 }
+
+export const deleteUser = async (userId) => {
+  const res = await api.post("/admin/delete-user", { userId })
+  return res.data
+}
