@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { getTechnicianReviews } from "../../services/technicianService"
+import { getTechnicianReviews, deleteReview } from "../../services/technicianService"
 import StarRating from "../common/StarRating"
+import { useAuth } from "../../context/AuthContextDefinition"
 
-const ReviewList = ({ technicianId }) => {
+const ReviewList = ({ technicianId, onEdit, onRefresh }) => {
     const [reviews, setReviews] = useState([])
     const [stats, setStats] = useState({
         totalReviews: 0,
@@ -10,6 +11,7 @@ const ReviewList = ({ technicianId }) => {
         ratingCounts: {}
     })
     const [loading, setLoading] = useState(false)
+    const { user } = useAuth()
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -26,7 +28,25 @@ const ReviewList = ({ technicianId }) => {
             }
         }
         fetchReviews()
-    }, [technicianId])
+    }, [technicianId, onRefresh]) // Re-fetch when onRefresh changes
+
+    const handleDelete = async (reviewId) => {
+        if (!window.confirm("Are you sure you want to delete this review?")) return
+        try {
+            await deleteReview(reviewId)
+            // Refresh reviews locally or trigger parent refresh
+            // We can just trigger the effect by toggling a refreshing state or calling parent
+            // But since we have onRefresh prop which might be a toggle from parent, 
+            // let's just re-fetch here if we can't trigger parent easily.
+            // Actually, simpler to just re-fetch:
+            const data = await getTechnicianReviews(technicianId)
+            setReviews(data.reviews)
+            setStats(data.stats)
+        } catch (error) {
+            console.error("Failed to delete review", error)
+            alert("Failed to delete review")
+        }
+    }
 
     if (loading) {
         return <div className="text-center py-8">Loading reviews...</div>
@@ -97,12 +117,28 @@ const ReviewList = ({ technicianId }) => {
                                             <div className="flex items-center gap-2 mt-1">
                                                 <StarRating rating={review.rating} size="sm" />
                                                 <span className="text-xs text-slate-400">
-                                                    {review.createdAt?.seconds
-                                                        ? new Date(review.createdAt.seconds * 1000).toLocaleDateString()
+                                                    {review.createdAt
+                                                        ? new Date(review.createdAt).toLocaleDateString()
                                                         : "Just now"}
                                                 </span>
                                             </div>
                                         </div>
+                                        {user && user.uid === review.customerId && (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => onEdit(review)}
+                                                    className="text-xs font-semibold text-slate-500 hover:text-black px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(review.id)}
+                                                    className="text-xs font-semibold text-red-500 hover:text-red-700 px-2 py-1 rounded bg-red-50 hover:bg-red-100"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="mt-2 text-slate-600 text-sm leading-relaxed">
                                         {review.review}

@@ -1,14 +1,27 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-import { rateTechnician } from "../../services/technicianService"
+import { rateTechnician, updateReview } from "../../services/technicianService"
 import StarRating from "../common/StarRating"
 
-const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
+const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded, reviewToEdit }) => {
 
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+
+    useEffect(() => {
+        if (isOpen) {
+            if (reviewToEdit) {
+                setRating(reviewToEdit.rating)
+                setComment(reviewToEdit.review)
+            } else {
+                setRating(0)
+                setComment("")
+            }
+            setError("")
+        }
+    }, [isOpen, reviewToEdit])
 
     if (!isOpen) return null
 
@@ -23,11 +36,17 @@ const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
         setError("")
 
         try {
-            await rateTechnician(technicianId, rating, comment)
+            if (reviewToEdit) {
+                await updateReview(reviewToEdit.id, rating, comment)
+            } else {
+                await rateTechnician(technicianId, rating, comment)
+            }
             onReviewAdded()
             onClose()
-            setRating(0)
-            setComment("")
+            if (!reviewToEdit) {
+                setRating(0)
+                setComment("")
+            }
         } catch (err) {
             console.error(err)
             const msg = err.response?.data?.message || "Failed to submit review"
@@ -47,7 +66,9 @@ const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
                     ✕
                 </button>
 
-                <h2 className="text-xl font-bold mb-1 text-slate-900">Write a Review</h2>
+                <h2 className="text-xl font-bold mb-1 text-slate-900">
+                    {reviewToEdit ? "Edit Review" : "Write a Review"}
+                </h2>
                 <p className="text-sm text-slate-500 mb-6">Share your experience with this technician.</p>
 
                 {error && (
@@ -87,7 +108,7 @@ const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded }) => {
                         disabled={loading}
                         className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:opacity-90 disabled:opacity-50"
                     >
-                        {loading ? "Posting..." : "Post Review"}
+                        {loading ? "Posting..." : (reviewToEdit ? "Update Review" : "Post Review")}
                     </button>
                 </form>
             </div>

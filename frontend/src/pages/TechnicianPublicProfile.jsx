@@ -18,6 +18,7 @@ const TechnicianPublicProfile = () => {
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
     const [showReviewModal, setShowReviewModal] = useState(false)
+    const [reviewToEdit, setReviewToEdit] = useState(null)
     const { user } = useAuth()
     const navigate = useNavigate()
 
@@ -66,6 +67,16 @@ const TechnicianPublicProfile = () => {
         }
         // eslint-disable-next-line
     }, [technicianId])
+
+    const handleEditReview = (review) => {
+        setReviewToEdit(review)
+        setShowReviewModal(true)
+    }
+
+    const handleCloseModal = () => {
+        setShowReviewModal(false)
+        setReviewToEdit(null)
+    }
 
     if (loading) return <div className="p-8 text-center text-slate-500">Loading profile...</div>
 
@@ -121,7 +132,10 @@ const TechnicianPublicProfile = () => {
                             </a>
                         )}
                         <button
-                            onClick={() => setShowReviewModal(true)}
+                            onClick={() => {
+                                setReviewToEdit(null)
+                                setShowReviewModal(true)
+                            }}
                             className="border border-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-slate-50"
                         >
                             Write a Review
@@ -136,14 +150,15 @@ const TechnicianPublicProfile = () => {
                     <h2 className="text-xl font-bold text-slate-900">Reviews & Ratings</h2>
                 </div>
 
-                {stats && <ReviewList technicianId={technician.id} />}
+                {stats && <ReviewList technicianId={technician.id} onEdit={handleEditReview} onRefresh={loadData} />}
             </div>
 
             <AddReviewModal
                 isOpen={showReviewModal}
-                onClose={() => setShowReviewModal(false)}
+                onClose={handleCloseModal}
                 technicianId={technician.id}
                 onReviewAdded={loadData}
+                reviewToEdit={reviewToEdit}
             />
         </div>
     )

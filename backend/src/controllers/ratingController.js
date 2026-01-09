@@ -79,9 +79,16 @@ export const getReviews = async (req, res) => {
       const userSnap = await db.collection("users").doc(data.customerId).get()
       const userData = userSnap.data() || {}
 
+      let createdAtISO = null
+      if (data.createdAt) {
+        // Handle Firestore Timestamp or standard Date object
+        createdAtISO = data.createdAt.toDate ? data.createdAt.toDate().toISOString() : new Date(data.createdAt).toISOString()
+      }
+
       return {
         id: doc.id,
         ...data,
+        createdAt: createdAtISO, // standardized date
         customerName: userData.name || "Anonymous",
         customerPhotoUrl: userData.profilePic || null,
       }
@@ -91,8 +98,8 @@ export const getReviews = async (req, res) => {
 
     // Sort in memory (newest first)
     resolvedReviews.sort((a, b) => {
-      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt)
-      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt)
+      const dateA = new Date(a.createdAt)
+      const dateB = new Date(b.createdAt)
       return dateB - dateA
     })
 
@@ -110,5 +117,115 @@ export const getReviews = async (req, res) => {
   } catch (error) {
     console.error("Get reviews error", error)
     res.status(500).json({ message: "Failed to fetch reviews" })
+  }
+}
+
+export const updateRating = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { rating, review } = req.body
+    const customerId = req.user.uid
+
+    const ratingRef = db.collection("ratings").doc(id)
+    const doc = await ratingRef.get()
+
+    if (!doc.exists) {
+      return res.status(404).json({ message: "Review not found" })
+    }
+
+    const data = doc.data()
+    if (data.customerId !== customerId) {
+      return res.status(403).json({ message: "Not authorized to edit this review" })
+    }
+
+    const numericRating = Number(rating)
+    if (!numericRating || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1-5" })
+    }
+
+    // Update stats if rating changed
+    if (data.rating !== numericRating) {
+      const techRef = db.collection("technicians").doc(data.technicianId)
+      const techDoc = await techRef.get()
+
+      if (techDoc.exists) {
+        const techData = techDoc.data()
+        const currentTotal = techData.totalReviews
+        const currentAvg = techData.averageRating
+
+        // Calculate new sum: (oldAvg * count) - oldRating + newRating
+        const newSum = (currentAvg * currentTotal) - data.rating + numericRating
+        const newAvg = newSum / currentTotal
+
+        await techRef.update({
+          averageRating: Number(newAvg.toFixed(1))
+        })
+      }
+    }
+
+    await ratingRef.update({
+      rating: numericRating,
+      review,
+      updatedAt: new Date()
+    })
+
+    res.json({ message: "Review updated successfully" })
+  } catch (error) {
+    console.error("Update review error", error)
+    res.status(500).json({ message: "Failed to update review" })
+  }
+}
+
+export const deleteRating = async (req, res) => {
+  try {
+    const { id } = req.params
+    const customerId = req.user.uid
+
+    const ratingRef = db.collection("ratings").doc(id)
+    const doc = await ratingRef.get()
+
+    if (!doc.exists) {
+      return res.status(404).json({ message: "Review not found" })
+    }
+
+    const data = doc.data()
+    // Allow admin or the owner to delete
+    if (data.customerId !== customerId && req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Not authorized to delete this review" })
+    }
+
+    // Update technician stats
+    const techRef = db.collection("technicians").doc(data.technicianId)
+    const techDoc = await techRef.get()
+
+    if (techDoc.exists) {
+      const techData = techDoc.data()
+      const currentTotal = techData.totalReviews
+
+      if (currentTotal > 1) {
+        const currentAvg = techData.averageRating
+        // Calculate new sum: (oldAvg * count) - deletedRating
+        const newSum = (currentAvg * currentTotal) - data.rating
+        const newAvg = newSum / (currentTotal - 1)
+
+        await techRef.update({
+          totalReviews: currentTotal - 1,
+          averageRating: Number(newAvg.toFixed(1))
+        })
+      } else {
+        // Last review deleted, reset stats
+        await techRef.update({
+          totalReviews: 0,
+          averageRating: 0
+        })
+      }
+    }
+
+    await ratingRef.delete()
+
+    res.json({ message: "Review deleted successfully" })
+  } catch (error) {
+    console.error("Delete review error", error)
+    res.status(500).json({ message: "Failed to delete review" })
   }
 }

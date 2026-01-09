@@ -57,6 +57,19 @@ export const getTechnicianCities = async () => {
   return res.data
 }
 
+export const updateReview = async (reviewId, rating, review) => {
+  const res = await api.put(`/rating/${reviewId}`, {
+    rating: Number(rating),
+    review,
+  })
+  return res.data
+}
+
+export const deleteReview = async (reviewId) => {
+  const res = await api.delete(`/rating/${reviewId}`)
+  return res.data
+}
+
 export const getTechnicianCategories = async () => {
   const res = await api.get("/technician/categories")
   return res.data

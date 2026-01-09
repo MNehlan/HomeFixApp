@@ -56,6 +56,16 @@ const ChatPage = () => {
         }
     }
 
+    const handleBackToDashboard = () => {
+        if (user?.role === 'technician') {
+            navigate('/technician')
+        } else if (user?.role === 'admin') {
+            navigate('/admin')
+        } else {
+            navigate('/customer')
+        }
+    }
+
     const handleChatSelect = (id) => {
         navigate(`/chat/${id}`)
     }
@@ -64,8 +74,14 @@ const ChatPage = () => {
         <div className="flex h-[calc(100vh-80px)] bg-slate-50 max-w-7xl mx-auto rounded-2xl overflow-hidden border border-slate-200 shadow-sm m-4">
             {/* Sidebar - Chat List */}
             <div className={`w-full md:w-80 bg-white border-r border-slate-200 flex flex-col ${chatId ? 'hidden md:flex' : 'flex'}`}>
-                <div className="p-4 border-b border-slate-100">
+                <div className="p-4 border-b border-slate-100 flex justify-between items-center">
                     <h2 className="text-xl font-bold text-slate-900">Messages</h2>
+                    <button
+                        onClick={handleBackToDashboard}
+                        className="text-xs font-semibold px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+                    >
+                        Dashboard
+                    </button>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {chats.length === 0 ? (
