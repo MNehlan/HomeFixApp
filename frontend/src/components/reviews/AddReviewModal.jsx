@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { rateTechnician, updateReview } from "../../services/technicianService"
 import StarRating from "../common/StarRating"
 
-const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded, reviewToEdit }) => {
+const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded, reviewToEdit, jobId }) => {
 
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState("")
@@ -39,7 +39,10 @@ const AddReviewModal = ({ isOpen, onClose, technicianId, onReviewAdded, reviewTo
             if (reviewToEdit) {
                 await updateReview(reviewToEdit.id, rating, comment)
             } else {
-                await rateTechnician(technicianId, rating, comment)
+                await rateTechnician(technicianId, rating, comment, jobId)
+                // Note: CustomerJobs passes 'jobId' via props? No, slightly complex. 
+                // CustomerJobs: <AddReviewModal jobId={selectedJobId} ... />
+                // AddReviewModal props: ({ isOpen, onClose, technicianId, onReviewAdded, reviewToEdit, jobId })
             }
             onReviewAdded()
             onClose()

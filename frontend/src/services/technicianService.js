@@ -35,11 +35,12 @@ export const searchTechnicians = async (params) => {
 /**
  * Rate a technician (customer)
  */
-export const rateTechnician = async (technicianId, rating, review) => {
+export const rateTechnician = async (technicianId, rating, review, jobId) => {
   const res = await api.post("/rating", {
     technicianId,
     rating: Number(rating),
     review,
+    jobId,
   })
   return res.data
 }

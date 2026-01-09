@@ -8,6 +8,7 @@ import adminRoutes from "./routes/adminRoutes.js"
 import ratingRoutes from "./routes/ratingRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js"
 import homeRoutes from "./routes/homeRoutes.js"
+import jobRoutes from "./routes/jobRoutes.js"
 
 const app = express()
 app.use(cors())
@@ -20,5 +21,6 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/rating", ratingRoutes)
 app.use("/api/search", searchRoutes)
 app.use("/api/home", homeRoutes)
+app.use("/api/jobs", jobRoutes)
 
 export default app

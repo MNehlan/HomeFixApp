@@ -11,7 +11,8 @@ import Home from "./pages/Home";
 import PartnerSignup from "./pages/PartnerSignup";
 import TechnicianPublicProfile from "./pages/TechnicianPublicProfile";
 import ChatPage from "./pages/ChatPage";
-
+import CustomerJobs from "./pages/customer/CustomerJobs"
+import TechnicianJobs from "./pages/technician/TechnicianJobs"
 function App() {
   return (
     <AuthProvider>
@@ -43,6 +44,14 @@ function App() {
           }
         />
         <Route
+          path="/customer/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <CustomerJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/technician/profile/:technicianId"
           element={
             <ProtectedRoute allowedRoles={["customer", "admin"]}>
@@ -60,6 +69,17 @@ function App() {
               requireApprovedTechnician
             >
               <TechnicianDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/technician/jobs"
+          element={
+            <ProtectedRoute
+              allowedRoles={["technician"]}
+              requireApprovedTechnician
+            >
+              <TechnicianJobs />
             </ProtectedRoute>
           }
         />

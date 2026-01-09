@@ -6,6 +6,7 @@ import { getTechnicianReviews } from "../services/technicianService"
 import ReviewList from "../components/reviews/ReviewList"
 import AddReviewModal from "../components/reviews/AddReviewModal"
 import StarRating from "../components/common/StarRating"
+import ServiceRequestModal from "../components/ServiceRequestModal"
 import { useAuth } from "../context/AuthContextDefinition"
 import { initiateChat } from "../services/chatService"
 import { useNavigate } from "react-router-dom"
@@ -19,6 +20,7 @@ const TechnicianPublicProfile = () => {
     const [loading, setLoading] = useState(true)
     const [showReviewModal, setShowReviewModal] = useState(false)
     const [reviewToEdit, setReviewToEdit] = useState(null)
+    const [showRequestModal, setShowRequestModal] = useState(false)
     const { user } = useAuth()
     const navigate = useNavigate()
 
@@ -114,9 +116,17 @@ const TechnicianPublicProfile = () => {
 
                     <div className="flex gap-3 justify-center md:justify-start">
                         {technician.isAvailable !== false ? (
-                            <button onClick={handleChat} className="bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90">
-                                Chat & Book
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => setShowRequestModal(true)}
+                                    className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                                >
+                                    Request Service
+                                </button>
+                                <button onClick={handleChat} className="bg-black text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90">
+                                    Chat
+                                </button>
+                            </>
                         ) : (
                             <button disabled className="bg-slate-200 text-slate-500 px-6 py-2.5 rounded-xl font-semibold cursor-not-allowed">
                                 Currently Unavailable
@@ -131,15 +141,7 @@ const TechnicianPublicProfile = () => {
                                 <span>📞</span> Call Now
                             </a>
                         )}
-                        <button
-                            onClick={() => {
-                                setReviewToEdit(null)
-                                setShowReviewModal(true)
-                            }}
-                            className="border border-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-slate-50"
-                        >
-                            Write a Review
-                        </button>
+                        {/* Review button removed to enforce 'Rate only after Job Completion' rule */}
                     </div>
                 </div>
             </div>
@@ -153,6 +155,7 @@ const TechnicianPublicProfile = () => {
                 {stats && <ReviewList technicianId={technician.id} onEdit={handleEditReview} onRefresh={loadData} />}
             </div>
 
+
             <AddReviewModal
                 isOpen={showReviewModal}
                 onClose={handleCloseModal}
@@ -160,6 +163,19 @@ const TechnicianPublicProfile = () => {
                 onReviewAdded={loadData}
                 reviewToEdit={reviewToEdit}
             />
+
+            {showRequestModal && (
+                <ServiceRequestModal
+                    technicianId={technician.id}
+                    technicianName={technician.name}
+                    onClose={() => setShowRequestModal(false)}
+                    onSuccess={() => {
+                        alert("Service request sent successfully! Check your dashboard.")
+                        setShowRequestModal(false)
+                        navigate('/customer/jobs')
+                    }}
+                />
+            )}
         </div>
     )
 }
