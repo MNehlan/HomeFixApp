@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X, Calendar, Clock, AlertCircle } from 'lucide-react'
+import api from "../services/api"
 
 const ServiceRequestModal = ({ technicianId, technicianName, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
@@ -20,67 +21,53 @@ const ServiceRequestModal = ({ technicianId, technicianName, onClose, onSuccess 
         setError(null)
 
         try {
-            const token = localStorage.getItem('token')
-            const response = await fetch('http://localhost:5001/api/jobs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token} `
-                },
-                body: JSON.stringify({
-                    technicianId,
-                    ...formData
-                })
+            await api.post('/jobs', {
+                technicianId,
+                ...formData
             })
-
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to request service')
-            }
 
             onSuccess()
             onClose()
         } catch (err) {
-            setError(err.message)
+            setError(err.response?.data?.message || err.message || 'Failed to request service')
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+            <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 transform transition-all scale-100">
 
-                {/* Header */}
-                <div className="relative h-24 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+                {/* Header - Clean & Premium */}
+                <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-900">Request Service</h2>
+                        <p className="text-sm text-slate-500 mt-0.5">Booking with <span className="font-semibold text-slate-700">{technicianName}</span></p>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-1.5 rounded-full"
+                        className="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors"
                     >
                         <X size={20} />
                     </button>
-                    <div className="text-center text-white">
-                        <h2 className="text-xl font-bold">Request Service</h2>
-                        <p className="text-sm text-blue-100 opacity-90">with {technicianName}</p>
-                    </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 bg-white space-y-5">
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-sm flex items-start gap-2">
-                            <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                            <span>{error}</span>
+                        <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm flex items-start gap-3 border border-red-100">
+                            <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                            <span className="font-medium">{error}</span>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</label>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="grid grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Date</label>
+                                <div className="relative group">
+                                    <Calendar className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                                     <input
                                         type="date"
                                         name="date"
@@ -88,46 +75,53 @@ const ServiceRequestModal = ({ technicianId, technicianName, onClose, onSuccess 
                                         min={new Date().toISOString().split('T')[0]}
                                         value={formData.date}
                                         onChange={handleChange}
-                                        className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Time</label>
-                                <div className="relative">
-                                    <Clock className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Time</label>
+                                <div className="relative group">
+                                    <Clock className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                                     <input
                                         type="time"
                                         name="time"
                                         required
                                         value={formData.time}
                                         onChange={handleChange}
-                                        className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Problem Description</label>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Problem Description</label>
                             <textarea
                                 name="description"
                                 required
-                                rows="3"
-                                placeholder="Describe the issue in detail..."
+                                rows="4"
+                                placeholder="Please describe the issue in detail..."
                                 value={formData.description}
                                 onChange={handleChange}
-                                className="w-full p-3 bg-gray-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none dark:text-white"
+                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none text-slate-700 placeholder:text-slate-400"
                             ></textarea>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-                        >
-                            {loading ? 'Sending Request...' : 'Send Request'}
-                        </button>
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3.5 bg-black hover:bg-slate-800 text-white rounded-xl font-bold text-sm tracking-wide transition-all shadow-lg shadow-slate-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>Sending Request...</span>
+                                    </>
+                                ) : 'Send Service Request'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

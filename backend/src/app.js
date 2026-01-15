@@ -9,6 +9,7 @@ import ratingRoutes from "./routes/ratingRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js"
 import homeRoutes from "./routes/homeRoutes.js"
 import jobRoutes from "./routes/jobRoutes.js"
+import chatRoutes from "./routes/chatRoutes.js"
 
 const app = express()
 app.use(cors())
@@ -22,5 +23,6 @@ app.use("/api/rating", ratingRoutes)
 app.use("/api/search", searchRoutes)
 app.use("/api/home", homeRoutes)
 app.use("/api/jobs", jobRoutes)
+app.use("/api/chat", chatRoutes)
 
 export default app

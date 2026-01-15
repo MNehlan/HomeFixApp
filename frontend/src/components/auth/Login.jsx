@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContextDefinition"
 
-const Login = () => {
+const Login = ({ onForgotPassword }) => {
   const { login, authError } = useAuth()
   const navigate = useNavigate()
 
@@ -68,7 +68,16 @@ const Login = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+          <div className="flex justify-between items-center">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+            >
+              Forgot Password?
+            </button>
+          </div>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}

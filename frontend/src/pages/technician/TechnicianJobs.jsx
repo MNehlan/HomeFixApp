@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Calendar, Clock, MapPin, CheckCircle, XCircle, Play, Check } from "lucide-react"
+import api from "../../services/api"
 
 const TechnicianJobs = () => {
     // const { user } = useAuth()
     const [jobs, setJobs] = useState([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState("REQUESTED") // REQUESTED, ACTIVE, HISTORY
+    const navigate = useNavigate()
 
     const fetchJobs = async () => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://localhost:5001/api/jobs", {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            if (!response.ok) throw new Error("Failed to fetch jobs")
-
-            const data = await response.json()
-            setJobs(data)
+            const response = await api.get("/jobs")
+            setJobs(response.data)
         } catch (err) {
             console.error(err)
         } finally {
@@ -30,21 +27,7 @@ const TechnicianJobs = () => {
 
     const updateStatus = async (jobId, newStatus) => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://localhost:5001/api/jobs/${jobId}/status`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-
-            if (!response.ok) {
-                const data = await response.json()
-                throw new Error(data.message || "Failed to update status")
-            }
-
+            await api.patch(`/jobs/${jobId}/status`, { status: newStatus })
             fetchJobs() // Refresh list
         } catch (err) {
             alert(err.message)
@@ -62,7 +45,15 @@ const TechnicianJobs = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold mb-6 text-slate-900">Job Management</h1>
+            <div className="flex items-center gap-4 mb-6">
+                <button
+                    onClick={() => navigate('/technician')}
+                    className="text-slate-500 hover:text-slate-700 font-medium"
+                >
+                    ← Back
+                </button>
+                <h1 className="text-2xl font-bold text-slate-900">Job Management</h1>
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 border-b border-slate-200">

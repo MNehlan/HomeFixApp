@@ -64,6 +64,12 @@ const CustomerDashboard = () => {
               Messages
             </button>
             <button
+              onClick={() => navigate("/customer/jobs")}
+              className="px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              My Requests
+            </button>
+            <button
               onClick={() => navigate("/partner")}
               className="px-6 py-2.5 rounded-xl bg-black text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-black/20"
             >

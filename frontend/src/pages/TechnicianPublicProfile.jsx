@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { doc, getDoc } from "firebase/firestore"
-import { db } from "../firebase/firebaseConfig"
+import api from "../services/api"
 import { getTechnicianReviews } from "../services/technicianService"
 import ReviewList from "../components/reviews/ReviewList"
 import AddReviewModal from "../components/reviews/AddReviewModal"
@@ -42,20 +41,15 @@ const TechnicianPublicProfile = () => {
             setLoading(true)
 
             // Fetch Technician Details
-            // Assuming technicians are in 'users' collection
-            const techDoc = await getDoc(doc(db, "users", technicianId))
+            // Fetch Technician Details
+            const res = await api.get(`/technician/${technicianId}`)
+            const profileData = res.data
 
-            if (!techDoc.exists()) {
-                console.error("Technician not found")
-                setLoading(false)
-                return
-            }
-
-            setTechnician({ id: techDoc.id, ...techDoc.data() })
+            setTechnician(profileData)
 
             // Fetch Reviews & Stats
-            const data = await getTechnicianReviews(technicianId)
-            setStats(data.stats)
+            const reviewsData = await getTechnicianReviews(technicianId)
+            setStats(reviewsData.stats)
         } catch (err) {
             console.error("Failed to load technician profile", err)
         } finally {
@@ -86,6 +80,14 @@ const TechnicianPublicProfile = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
+            {/* Back Button */}
+            <button
+                onClick={() => navigate(-1)}
+                className="mb-4 text-slate-500 hover:text-slate-800 font-semibold flex items-center gap-2"
+            >
+                ← Back
+            </button>
+
             {/* Header Profile Card */}
             <div className="bg-white rounded-2xl shadow-sm border p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start mb-8">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-100 overflow-hidden shrink-0 border-4 border-white shadow-lg">

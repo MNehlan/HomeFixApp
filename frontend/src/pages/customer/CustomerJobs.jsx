@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import AddReviewModal from "../../components/reviews/AddReviewModal"
+import api from "../../services/api"
 import { Calendar, Clock, MapPin, AlertCircle, CheckCircle } from "lucide-react"
 
 const CustomerJobs = () => {
@@ -7,6 +9,7 @@ const CustomerJobs = () => {
     const [jobs, setJobs] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const navigate = useNavigate()
 
     // Rating State
     const [showRatingModal, setShowRatingModal] = useState(false)
@@ -15,14 +18,8 @@ const CustomerJobs = () => {
 
     const fetchJobs = async () => {
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://localhost:5001/api/jobs", {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            if (!response.ok) throw new Error("Failed to fetch jobs")
-
-            const data = await response.json()
-            setJobs(data)
+            const response = await api.get("/jobs")
+            setJobs(response.data)
         } catch (err) {
             setError(err.message)
         } finally {
@@ -38,17 +35,7 @@ const CustomerJobs = () => {
         if (!window.confirm("Are you sure you want to cancel this request?")) return;
 
         try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`http://localhost:5001/api/jobs/${jobId}/status`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: "CANCELLED" })
-            })
-
-            if (!response.ok) throw new Error("Failed to cancel job")
+            await api.patch(`/jobs/${jobId}/status`, { status: "CANCELLED" })
             fetchJobs() // Refresh
         } catch (err) {
             alert(err.message)
@@ -77,7 +64,15 @@ const CustomerJobs = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold mb-6 text-slate-900">My Service Requests</h1>
+            <div className="flex items-center gap-4 mb-6">
+                <button
+                    onClick={() => navigate('/customer')}
+                    className="text-slate-500 hover:text-slate-700 font-medium"
+                >
+                    ← Back
+                </button>
+                <h1 className="text-2xl font-bold text-slate-900">My Service Requests</h1>
+            </div>
 
             {error && <div className="text-red-500 mb-4">{error}</div>}
 

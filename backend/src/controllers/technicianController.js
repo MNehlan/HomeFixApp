@@ -142,3 +142,46 @@ export const getTechnicianCategories = async (_req, res) => {
     res.status(500).json({ message: "Failed to load categories" });
   }
 };
+
+export const getTechnicianById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userRef = db.collection("users").doc(id)
+    const userSnap = await userRef.get()
+
+    if (!userSnap.exists) {
+      return res.status(404).json({ message: "Technician not found" })
+    }
+
+    if (!userSnap.data().roles?.includes("technician")) {
+      return res.status(404).json({ message: "User is not a technician" })
+    }
+
+    const techSnap = await db.collection("technicians").doc(id).get()
+    
+    // Even if techSnap is missing (shouldn't happen for valid tech), return user info that is safe
+    const techData = techSnap.exists ? techSnap.data() : {}
+
+    res.json({
+      id: id,
+      uid: id,
+      name: userSnap.data().name,
+      profilePic: userSnap.data().profilePic || "",
+      technicianStatus: userSnap.data().technicianStatus,
+      // Publicly safe fields
+      category: techData.category || "General",
+      experience: techData.experience || "0 years",
+      bio: techData.bio || "",
+      averageRating: techData.averageRating || 0,
+      totalReviews: techData.totalReviews || 0,
+      isAvailable: techData.isAvailable !== false,
+      mobile: techData.mobile || userSnap.data().mobile || "", // Consider privacy? Requirement seems to allow calling.
+      city: techData.city || "",
+      price: techData.price || 0,
+    })
+
+  } catch (error) {
+    console.error("Get technician by ID error", error)
+    res.status(500).json({ message: "Failed to fetch technician profile" })
+  }
+}

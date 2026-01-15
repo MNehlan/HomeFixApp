@@ -69,19 +69,12 @@ export const createJob = async (req, res) => {
 export const getJobs = async (req, res) => {
   try {
     const userId = req.user.uid;
-    const userSnapshot = await db.collection("users").doc(userId).get();
-    const userRole = userSnapshot.data().role;
+    // Use data from authMiddleware to avoid re-fetching and potential crashes
+    const userRole = req.user.role;
+    const roles = req.user.roles || [];
 
     let query;
 
-    // Determine query based on role.
-    // Note: Assuming 'admin' role exists in user.role or user.roles
-    // The prompt says "Existing User Roles: ... 3. Admin (only one)"
-    // I will check generic role logic. Usually it's in 'roles' array or 'role' string.
-    // Based on userController it seems 'roles' array is used, but 'role' might be primary.
-    // Safest to check logic.
-
-    const roles = userSnapshot.data().roles || [];
     const isAdmin = roles.includes("admin") || userRole === "admin";
     const isTechnician = roles.includes("technician");
 
@@ -94,11 +87,20 @@ export const getJobs = async (req, res) => {
       query = db.collection("jobs").where("customerId", "==", userId);
     }
 
-    const snapshot = await query.orderBy("createdAt", "desc").get();
+    // Remove orderBy from query to avoid "Index Required" error. 
+    // Perform in-memory sorting instead.
+    const snapshot = await query.get();
 
     const jobs = [];
     snapshot.forEach((doc) => {
       jobs.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort by createdAt desc
+    jobs.sort((a, b) => {
+       const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+       const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+       return dateB - dateA;
     });
 
     res.json(jobs);

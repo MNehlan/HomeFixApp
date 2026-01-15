@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useSearchParams, Link } from "react-router-dom"
 import Login from "../components/auth/Login"
 import Register from "../components/auth/Register"
+import ForgotPassword from "../components/auth/ForgotPassword"
 
 const AuthPage = () => {
   const [searchParams] = useSearchParams()
@@ -58,7 +59,9 @@ const AuthPage = () => {
           </div>
 
           <div className="bg-white">
-            {mode === "login" ? <Login /> : <Register />}
+            {mode === "login" && <Login onForgotPassword={() => setMode("forgot-password")} />}
+            {mode === "register" && <Register />}
+            {mode === "forgot-password" && <ForgotPassword onBack={() => setMode("login")} />}
           </div>
 
           <div className="mt-8 text-center text-xs text-slate-400">

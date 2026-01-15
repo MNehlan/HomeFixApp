@@ -140,6 +140,12 @@ const TechnicianDashboard = () => {
             >
               Edit Profile
             </button>
+            <button
+              onClick={() => navigate("/technician/jobs")}
+              className="flex-1 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              Manage Jobs
+            </button>
           </div>
         </div>
 

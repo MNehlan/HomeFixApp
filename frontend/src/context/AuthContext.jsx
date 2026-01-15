@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import api from "../services/api";
 
@@ -53,6 +54,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const resetPassword = (email) => {
+    return sendPasswordResetEmail(auth, email)
+  }
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
@@ -90,6 +95,7 @@ export const AuthProvider = ({ children }) => {
         authError,
         login,
         logout,
+        resetPassword,
         refreshUser: async () => {
           let profile = await fetchProfile()
           if (!profile) {

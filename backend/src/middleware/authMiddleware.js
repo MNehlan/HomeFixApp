@@ -28,7 +28,7 @@ export const verifyToken = async (req, res, next) => {
     } else {
       // NOTE: Allow request to proceed even if profile is missing
       // This is required for "Upload" during registration flow
-      console.log(`⚠️ Profile missing for ${decoded.uid}, treating as new user.`)
+      // console.log(`⚠️ Profile missing for ${decoded.uid}, treating as new user.`)
     }
 
     // 4️⃣ Force admin role ONLY for predefined admin email

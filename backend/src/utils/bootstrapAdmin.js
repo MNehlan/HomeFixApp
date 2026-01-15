@@ -10,7 +10,7 @@ export const bootstrapAdmin = async () => {
   try {
     // 1️⃣ Check if admin exists in Firebase Auth
     adminUser = await auth.getUserByEmail(email)
-    console.log("✅ Admin already exists in Firebase Auth")
+    // console.log("✅ Admin already exists in Firebase Auth")
   } catch (error) {
     // 2️⃣ If not exists → create admin in Firebase Auth
     if (error.code === "auth/user-not-found") {
@@ -18,7 +18,7 @@ export const bootstrapAdmin = async () => {
         email,
         password,
       })
-      console.log("🚀 Admin created in Firebase Auth")
+      // console.log("🚀 Admin created in Firebase Auth")
     } else {
       throw error
     }
@@ -38,8 +38,8 @@ export const bootstrapAdmin = async () => {
       createdAt: new Date(),
     })
 
-    console.log("📁 Admin profile created in Firestore")
+    // console.log("📁 Admin profile created in Firestore")
   } else {
-    console.log("📁 Admin profile already exists in Firestore")
+    // console.log("📁 Admin profile already exists in Firestore")
   }
 }
