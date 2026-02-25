@@ -1,13 +1,16 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { auth } from "../firebase/firebaseConfig";
 import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import api from "../services/api";
 
-const AuthContext = createContext(null);
+import { getFriendlyErrorMessage } from "../utils/errorUtils";
+
+import { AuthContext } from "./AuthContextDefinition";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -15,8 +18,15 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
 
   const fetchProfile = async () => {
-    const res = await api.get("/user/profile");
-    return res.data;
+    try {
+      const res = await api.get("/user/profile");
+      return res.data;
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return null; // Profile not created yet
+      }
+      throw err;
+    }
   };
 
   const login = async (email, password) => {
@@ -27,10 +37,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
 
       const profile = await fetchProfile();
+      if (!profile) {
+        throw new Error("Profile not found. Please contact support or register again.")
+      }
       setUser(profile);
       return profile;
     } catch (err) {
-      setAuthError("Invalid email or password");
+      setAuthError(getFriendlyErrorMessage(err));
       throw err;
     }
   };
@@ -41,13 +54,26 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const resetPassword = (email) => {
+    return sendPasswordResetEmail(auth, email)
+  }
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
           const token = await firebaseUser.getIdToken();
           localStorage.setItem("token", token);
-          const profile = await fetchProfile();
+
+          let profile = await fetchProfile();
+          // Retry loop to handle race conditions during signup (e.g. file uploads taking time)
+          let retries = 0;
+          while (!profile && retries < 5) {
+            await new Promise(r => setTimeout(r, 1000));
+            profile = await fetchProfile();
+            retries++;
+          }
+
           setUser(profile);
         } else {
           setUser(null);
@@ -71,6 +97,15 @@ export const AuthProvider = ({ children }) => {
         authError,
         login,
         logout,
+        resetPassword,
+        refreshUser: async () => {
+          let profile = await fetchProfile()
+          if (!profile) {
+            await new Promise(r => setTimeout(r, 1000));
+            profile = await fetchProfile();
+          }
+          setUser(profile)
+        },
         isAuthenticated: !!user,
       }}
     >
@@ -79,4 +114,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+

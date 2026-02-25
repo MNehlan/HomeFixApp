@@ -6,7 +6,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "homefix_profiles",
-    allowed_formats: ["jpg", "png", "jpeg"]
+    allowed_formats: ["jpg", "png", "jpeg", "pdf"]
   }
 })
 

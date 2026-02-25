@@ -43,6 +43,8 @@ export const updateProfile = async (req, res) => {
     if (req.body.price !== undefined)
       technicianUpdates.price = Number(req.body.price) || 0
     if (req.body.bio !== undefined) technicianUpdates.bio = req.body.bio
+    if (req.body.certificateUrl)
+      technicianUpdates.certificateUrl = req.body.certificateUrl
 
     if (Object.keys(technicianUpdates).length > 0) {
       await db
@@ -59,7 +61,11 @@ export const updateProfile = async (req, res) => {
 
     res.json({ message: "Profile updated" })
   } catch (error) {
-    console.error("Profile update error", error)
     res.status(500).json({ message: "Failed to update profile" })
   }
+}
+
+export const uploadFile = (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" })
+  res.json({ url: req.file.path })
 }
