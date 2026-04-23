@@ -19,6 +19,32 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
+
+    if (!form.name.trim()) {
+      setError("Full name is required.")
+      return
+    }
+    if (form.name.trim().length < 2) {
+      setError("Name must be at least 2 characters long.")
+      return
+    }
+    if (!form.email.trim()) {
+      setError("Email is required.")
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Please enter a valid email address.")
+      return
+    }
+    if (!form.password) {
+      setError("Password is required.")
+      return
+    }
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters long.")
+      return
+    }
+
     setLoading(true)
 
     try {

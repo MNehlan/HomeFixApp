@@ -10,10 +10,24 @@ const Login = ({ onForgotPassword }) => {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [validationError, setValidationError] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email || !password) return
+    setValidationError("")
+
+    if (!email.trim()) {
+      setValidationError("Email is required.")
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setValidationError("Please enter a valid email address.")
+      return
+    }
+    if (!password) {
+      setValidationError("Password is required.")
+      return
+    }
 
     setLoading(true)
     try {
@@ -49,9 +63,9 @@ const Login = ({ onForgotPassword }) => {
         </p>
       </div>
 
-      {authError && (
+      {(authError || validationError) && (
         <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
-          {authError}
+          {authError || validationError}
         </p>
       )}
 
