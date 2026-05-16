@@ -96,7 +96,7 @@ HomeFixApp/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/HomeFixApp.git
+git clone https://github.com/MNehlan/HomeFixApp.git
 cd HomeFixApp
 ```
 
